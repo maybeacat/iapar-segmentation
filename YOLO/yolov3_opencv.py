@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-import glob
+import fnmatch
+import os
 import logging
 import time
 
@@ -29,7 +30,14 @@ handler.setLevel(logging.INFO)
 
 logger.addHandler(handler)
    
-for addr in glob.glob("IAPAR2/*.jpg"):
+# gera um array com todos os paths dos .jpg no diretorio
+list_imgs = []
+for root, dirnames, filenames in os.walk('../imgs/Projeto_IAPAR/Base_Jersey/~rng'):
+    for filename in fnmatch.filter(filenames, '*.jpg'):
+        list_imgs.append(os.path.join(root, filename))
+
+# processa as imgs
+for addr in list_imgs:
     image = eqHist(cv2.imread(addr))
 
     if image is None:
