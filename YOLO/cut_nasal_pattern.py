@@ -2,20 +2,44 @@ import cv2
 import os
 import fnmatch
 
-arquivo = open("iapar2_focinhos.csv", "r")
+# command line
+import sys
+imgs_rootdir = '../imgs/Projeto_IAPAR/Base_Jersey'
+if(len(sys.argv) > 1):
+    if('-h' in sys.argv or '--help' in sys.argv):
+        print('-p (--path)     usa o path que voce quiser, passar como proximo argumento (bom para testar mudancas no codigo com pequenas amostras)')
+        print('-h (--help)     mostra essa msg')
+        print('')
+        print('comportamento padrao:')
+        print('- path = ' + imgs_rootdir)
+        quit()
+    if('-p' in sys.argv or '--path' in sys.argv):
+        imgs_rootdir = sys.argv[sys.argv.index('-p')+1 if ('-p' in sys.argv) else sys.argv.index('--path')+1]
+        print('custom path mode\n')
+print('path: ' + imgs_rootdir)
 
-for linha in arquivo:
+
+narinas = open("iapar2_focinhos.csv", "r") # csv onde estao armazenadas as coordenadas das narinas (formato: imgname,x0,y0,w0,h0,x1,y1,w1,h1)
+coords_file = open('iapar2_coords.csv', 'w') # csv onde serao armazenadas as coordenadas (formato: imgname,x0,y0,x1,y1)
+
+file_counter = 0 # contador de progresso usado em prints
+num_files = len(narinas.readlines())
+narinas.seek(0,0)
+
+for linha in narinas:
     linha = linha[:-2]
-
     linha = linha.replace("\n", "")
-    
     linha = linha.split(",")
     
     # procura a linha de nome de arquivo correspondente
-    for root, dirnames, filenames in os.walk('../imgs/Projeto_IAPAR/Base_Jersey/~rng'):
+    for root, dirnames, filenames in os.walk(imgs_rootdir):
         for filename in fnmatch.filter(filenames, linha[0]):
             imgpath = os.path.join(root, filename)
             break
+
+    # print progresso! arquivos restantes, nome do arquivo, num coords armazenadas (provavelmente multiplos de 4. quatro coords para uma narina...)
+    file_counter += 1
+    print ("(%.2f%%) %d/%d | %s | n=%d" % ((float(file_counter)/num_files)*100, file_counter, num_files, imgpath.split("/")[-1], len(linha)-1))
 
     img = cv2.imread(imgpath)
 
@@ -41,3 +65,7 @@ for linha in arquivo:
         if y_top < y_bot and x_esq < x_dir:
             roi = img[y_top : y_bot, x_esq : x_dir]
             cv2.imwrite("IAPAR2_nasal_pattern/" + linha[0], roi)
+            coords_file.write("%s,%d,%d,%d,%d\n" % (linha[0], x_esq, y_top, x_dir, y_bot))
+
+narinas.close()
+coords_file.close()
