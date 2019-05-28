@@ -10,18 +10,24 @@ estrutura do diretório imgs é a mesma que o Wyverson upou no drive [(link)](ht
 .
 ├── imgs
 │   ├── Imagens-USP
-│   └── Projeto_IAPAR
-│       ├── Base_Jersey
-│       │   ├── IAPAR2_1
-│       │   ├── IAPAR2_2
-│       │   └── IAPAR2_3
-│       └── Base_Puruna
-│           ├── Semana1
-│           ├── Semana2
-│           └── Semana3
+│   ├── Projeto_IAPAR
+│   │   ├── Base_Jersey
+│   │   │   ├── IAPAR2_1
+│   │   │   ├── IAPAR2_2
+│   │   │   └── IAPAR2_3
+│   │   └── Base_Puruna
+│   │       ├── Semana1
+│   │       ├── Semana2
+│   │       └── Semana3
+│   └── ~rng  (meu diretório com amostra pequena para testes locais)
 ├── LBP
+│   ├── cfg
+│   └── results
+│       ├── LBP_nasalpattern
+│       └── LBP_predictions
 └── YOLO
-    ├── IAPAR2_nasal_pattern
-    ├── YOLO_annotations
-    └── YOLOv3_predictions
+    ├── cfg
+    └── results
+        ├── YOLO_nasalpattern
+        └── YOLO_predictions
 ```
