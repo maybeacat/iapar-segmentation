@@ -19,14 +19,14 @@ if(len(sys.argv) > 1):
 print('path: ' + imgs_rootdir)
 
 
-narinas = open("iapar2_focinhos.csv", "r") # csv onde estao armazenadas as coordenadas das narinas (formato: imgname,x0,y0,w0,h0,x1,y1,w1,h1)
-coords_file = open('iapar2_coords.csv', 'w') # csv onde serao armazenadas as coordenadas (formato: imgname,x0,y0,x1,y1)
+narinas_file = open("results/YOLO_narinas.csv", "r") # csv onde estao armazenadas as coordenadas das narinas (formato: imgname,x0,y0,w0,h0,x1,y1,w1,h1)
+coords_file = open('results/YOLO_coords.csv', 'w') # csv onde serao armazenadas as coordenadas (formato: imgname,x0,y0,x1,y1)
 
 file_counter = 0 # contador de progresso usado em prints
-num_files = len(narinas.readlines())
-narinas.seek(0,0)
+num_files = len(narinas_file.readlines())
+narinas_file.seek(0,0)
 
-for linha in narinas:
+for linha in narinas_file:
     linha = linha[:-2]
     linha = linha.replace("\n", "")
     linha = linha.split(",")
@@ -64,8 +64,9 @@ for linha in narinas:
 
         if y_top < y_bot and x_esq < x_dir:
             roi = img[y_top : y_bot, x_esq : x_dir]
-            cv2.imwrite("IAPAR2_nasal_pattern/" + linha[0], roi)
+            cv2.imwrite("YOLO_nasalpattern/" + linha[0], roi)
             coords_file.write("%s,%d,%d,%d,%d\n" % (linha[0], x_esq, y_top, x_dir, y_bot))
 
-narinas.close()
+# fecha arquivos
+narinas_file.close()
 coords_file.close()

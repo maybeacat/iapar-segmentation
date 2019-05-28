@@ -32,8 +32,9 @@ print('path: ' + imgs_rootdir + '\nbox logging: ' + box_logging + '\n')
 
 
 # abre arquivos
-csv_file = open('iapar2_focinhos.csv', 'w') # csv para guardar as bounding boxes das narinas (x1,y1,w1,h1 && x2,y2,w2,h2)
-mistakes_file = open('iapar2_mistakes.txt', 'w') # txt para guardar os paths das imgs em que nao foram encontradas duas narinas
+narinas_file = open('results/YOLO_narinas.csv', 'w') # csv para guardar as bounding boxes das narinas (x1,y1,w1,h1 && x2,y2,w2,h2)
+mistakes_file = open('results/YOLO_mistakes.csv', 'w') # csv para guardar os paths das imgs em que nao foram encontradas duas narinas
+benchmark_file = open('results/YOLO_benchmark.txt', 'w') # guarda quantidade de narinas encontradas (array 'narinas') e tempo de execucao
 
 # equalizacao de histograma
 def eqHist(img):
@@ -46,7 +47,7 @@ init = time.time()
 CONFIDENCE = 0
 
 # carrega o modelo
-net = cv2.dnn.readNetFromDarknet("bois-yolov3.cfg", "bois-yolov3_30000.weights")
+net = cv2.dnn.readNetFromDarknet("cfg/bois-yolov3.cfg", "cfg/bois-yolov3_30000.weights")
 
 # pega os nomes das camadas
 ln = net.getLayerNames()
@@ -142,7 +143,7 @@ for addr in list_imgs:
             for coord in boxes[i]:
                 info += str(coord) + ","
                 
-    csv_file.write(info + '\n')
+    narinas_file.write(info + '\n')
 
 
     # parte que salva a img com bounding boxes
@@ -159,15 +160,18 @@ for addr in list_imgs:
                     cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
                     text = "{}: {:.2f}".format('narina', confidences[i])
                     cv2.putText(image, text, (x, y-5), cv2.FONT_HERSHEY_TRIPLEX, 2, color, 2) # desenha texto
-                    cv2.imwrite("YOLOv3_predictions/" + addr.split("/")[-1], image) # salva img
+                    cv2.imwrite("YOLO_predictions/" + addr.split("/")[-1], image) # salva img
 
-# mostra o tempo que demorou para terminar tudo
+# calcula o tempo que demorou para terminar tudo
 total_time = time.time() - init
 
-print("")
-print ('narinas:', narinas)
-print('total_time:', total_time)
+# benchmarking
+print()
+benchmark_str = "Detected: %d/%d (%.2f)\nNarinas: [%d,%d,%d,%d,%d]\nTempo: %.2f" % (narinas[2], len(list_imgs), (float(narinas[2])/len(list_imgs))*100, narinas[0], narinas[1], narinas[2], narinas[3], narinas[4], total_time)
+print(benchmark_str)
+benchmark_file.write(benchmark_str)
 
 # fecha arquivos
-csv_file.close()
+narinas_file.close()
 mistakes_file.close()
+benchmark_file.close()
