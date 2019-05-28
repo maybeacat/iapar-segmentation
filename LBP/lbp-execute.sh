@@ -33,8 +33,6 @@ mkdir results &&
 
 # roda lbp-detector.py
 file="lbp-detector.py"
-rm -r results/LBP_predictions || true
 mkdir results/LBP_predictions &&
-rm -r results/LBP_nasalpattern || true
 mkdir results/LBP_nasalpattern &&
 doit
