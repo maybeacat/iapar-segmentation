@@ -1,7 +1,8 @@
 # iapar-segmentation
-coisas do estágio+TCC
+se você está aqui, não precisa de uma descrição do projeto
 
-**estrutura de diretórios** (tree -d -L 4)
+## tree -d -L 4
+estrutura do diretório imgs é a mesma que o Wyverson upou no drive [(link)](https://drive.google.com/drive/folders/112fcVvMraI6m6dWHwDB9heX22jj8m9Jg)
 ```
 .
 ├── imgs
