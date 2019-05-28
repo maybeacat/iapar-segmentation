@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# execucao apaga o conteudo dos diretorios em questao! (YOLOv3_predictions, IAPAR2_nasal_pattern)
+# execucao apaga o conteudo dos diretorios em questao! (tudo em 'results')
 
 # vars
 # mudar aqui
 python2=asd  # se 'true', usa python2 em vez de python3
 args=""  # <nada> | -f | -n    por enquanto
-custompath=sdf  # se 'true', usa o path em $path
+custompath=true  # se 'true', usa o path em $path
 path="../imgs/~rng"
 fancy="****************************************" # decoracao
 
@@ -31,14 +31,16 @@ if [ "$custompath" = true ]; then
     echo "using custom path $path"
 fi
 
+
+rm -r results || true # garante execucao mesmo que a pasta nao exista
+mkdir results &&
+
 # roda yolov3_opencv.py
 file="yolov3_opencv.py"
-rm -r YOLOv3_predictions || true # garante execucao mesmo que a pasta nao exista
-mkdir YOLOv3_predictions &&
+mkdir results/YOLO_predictions &&
 doit
 
 # roda cut_nasal_pattern.py
 file="cut_nasal_pattern.py"
-rm -r IAPAR2_nasal_pattern || true
-mkdir IAPAR2_nasal_pattern &&
+mkdir results/YOLO_nasalpattern &&
 doit
