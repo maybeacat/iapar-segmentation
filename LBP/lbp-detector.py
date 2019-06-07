@@ -40,6 +40,7 @@ def cascade_detect(img, cascade, size=200):
     return r
 
 
+# python2 gosta de reclamar de acentos no codigo...
 # encontra regiao de interesse (Region Of Interest)
 def ROI(addr, muzzle, narina_r, narina_l):
     img0 = cv2.imread(addr, cv2.IMREAD_COLOR)  # imagem original
