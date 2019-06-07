@@ -25,10 +25,10 @@ print('path: ' + imgs_rootdir)
 narinas_file = open('results/LBP_narinas.csv', 'w') # csv para guardar as bounding boxes das narinas (x1,y1,w1,h1 && x2,y2,w2,h2)
 coords_file = open('results/LBP_coords.csv', 'w') # csv onde serao armazenadas as coordenadas (formato: imgname,x0,y0,x1,y1)
 mistakes_file = open('results/LBP_mistakes.csv', 'w') # csv para guardar os paths das imgs em que nao foram encontradas duas narinas
-benchmark_file = open('results/LBP_benchmark.txt', 'w') # guarda quantidade de narinas encontradas (array 'narinas') e tempo de execucao
+benchmark_file = open('results/LBP_benchmark.txt', 'w') # guarda quantidade de focinhos e narinas encontradas (array 'narinas') e tempo de execucao
 
-# contador de quais narinas foram encontradas [L, R]. idealmente o resultado seria [n, n] (n = numero de imgs)
-narinas = [0, 0]
+# contador de quantos focinhos e narinas foram encontrados [F, L, R]. idealmente o resultado seria [n, n, n] (n = numero de imgs)
+narinas = [0, 0, 0]
 
 
 def cascade_detect(img, cascade, size=200):
@@ -40,7 +40,7 @@ def cascade_detect(img, cascade, size=200):
     return r
 
 
-# encontra região de interesse (Region Of Interest)
+# encontra regiao de interesse (Region Of Interest)
 def ROI(addr, muzzle, narina_r, narina_l):
     img0 = cv2.imread(addr, cv2.IMREAD_COLOR)  # imagem original
     img0 = cv2.cvtColor(img0, cv2.COLOR_BGR2HSV)
@@ -48,23 +48,27 @@ def ROI(addr, muzzle, narina_r, narina_l):
     img0 = cv2.cvtColor(img0, cv2.COLOR_HSV2BGR)
     gray = cv2.cvtColor(img0, cv2.COLOR_BGR2GRAY)  # imagem escala de cinza
 
-    ty, tx = np.shape(gray) #tamanho da imagem
+    ty, tx = np.shape(gray) # tamanho da imagem
 
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    it = clahe.apply(gray)
+    gray = cv2.equalizeHist(gray)
+
+    # CLAHE - leve piorada na performance comparando com equalizar normal?
+    # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    # gray = clahe.apply(gray)
 
     # procura focinho
     m = cascade_detect(gray, muzzle, int(min(tx, ty)/3))
     # m = lista dos pontos focinhos encontrados
-    # m[i] = (x, y, w, h) do i-ésimo focinho
-    # x, y = posição do ponto inicial
+    # m[i] = (x, y, w, h) do i-esimo focinho
+    # x, y = posicao do ponto inicial
     # w, h = largura e altura
 
     if len(m) != 1:
-        print('Focinho não encontrado.')
+        print('Focinho nao encontrado.')
+        mistakes_file.write('%s,[%d %d %d]\n' % (addr, 0, 0, 0))
         return None
 
-    gray = cv2.equalizeHist(gray)
+    narinas[0] += 1 # focinho detectado
 
     m = m[0]
     dy = m[3]-m[1]
@@ -102,20 +106,20 @@ def ROI(addr, muzzle, narina_r, narina_l):
     left = cascade_detect(focinho[:, :250], narina_l, 75)
     
     # contar narinas encontradas. se nao forem duas, salvar caso de falha e abortar imagem
-    narinas[0] += len(left)
-    narinas[1] += len(right)
+    narinas[1] += len(left)
+    narinas[2] += len(right)
     if len(left) == 0 or len(right) == 0:  # quero executar write e return depois de ambos os ifs
         if len(left) == 0:
-            print('Narina esquerda não encontrada.')
+            print('Narina esquerda nao encontrada.')
         if len(right) == 0:
-            print('Narina direita não encontrada.')
-        mistakes_file.write('%s,[%d %d]\n' % (addr, len(right), len(left)))
+            print('Narina direita nao encontrada.')
+        mistakes_file.write('%s,[%d %d %d]\n' % (addr, 1, len(right), len(left)))
         return None
 
     left = left[0]
     right = right[0]
 
-    # Coordenadas da região de interesse
+    # Coordenadas da regiao de interesse
     # dentro da imagem do focinho
     w = (250 + right[0]) - (left[0] + left[2]) # distancia entre narinas
     h = w
@@ -135,7 +139,7 @@ def ROI(addr, muzzle, narina_r, narina_l):
     x1 = x0 + int(w * escala)
     y1 = y0 + int(h * escala)
 
-    # salva região de interesse
+    # salva regiao de interesse
     cv2.imwrite("results/LBP_nasalpattern/" + addr.split("/")[-1], img0[y0:y1, x0:x1])
 
     # desenha os retangulos nos objetos e salva as coordenadas
@@ -144,24 +148,25 @@ def ROI(addr, muzzle, narina_r, narina_l):
     x1e = int(x0e + left[2]*escala)
     y0e = int(m[1] + left[1]*escala)
     y1e = int(y0e + left[3]*escala)
-    cv2.rectangle(img0, (x0e, y0e), (x1e, y1e), (0, 255, 0), 2)
+    cv2.rectangle(img0, (x0e, y0e), (x1e, y1e), (0, 255, 0), 8)
     # narina direita
     x0d = int(m[0] + x*escala + w*escala)
     x1d = int(x0d + right[2]*escala)
     y0d = int(m[1] + right[1]*escala)
     y1d = int(y0d + right[3]*escala)
-    cv2.rectangle(img0, (x0d, y0d), (x1d, y1d), (255, 255, 0), 2)
+    cv2.rectangle(img0, (x0d, y0d), (x1d, y1d), (255, 255, 0), 8)
     narinas_file.write("%s,%d,%d,%d,%d,%d,%d,%d,%d\n" % (addr.split("/")[-1], x0e,y0e,x1e-x0e,y1e-y0e, x0d,y0d,x1d-x0d,y1d-y0d)) # (x1,y1,w1,h1 && x2,y2,w2,h2)
     # ROI
     x0 = int(m[0] + x*escala)
     x1 = int(x0 + w*escala)
     y0 = int(m[1] + y*escala)
     y1 = int(y0 + h*escala)
-    cv2.rectangle(img0, (x0, y0), (x1, y1), (0, 0, 255), 2)
+    cv2.rectangle(img0, (x0, y0), (x1, y1), (0, 0, 255), 8)
     coords_file.write("%s,%d,%d,%d,%d\n" % (addr.split("/")[-1], x0, y0, x1, y1))
 
-    # salva a imagem
-    cv2.imwrite("results/LBP_predictions/" + addr.split("/")[-1], img0)
+    # redimensiona e salva a imagem (salva todas... redimensiona para ocupar menos espaco)
+    imgr = cv2.resize(img0, None, fx=0.2, fy=0.2)
+    cv2.imwrite("results/LBP_predictions/" + addr.split("/")[-1], imgr)
     
     return focinho[y:y+h, x:x+w]
 
@@ -193,7 +198,7 @@ total_time = time.time() - init
 
 # benchmarking
 print()
-benchmark_str = "Detected: %d/%d (%.2f)\nNarinas: [%d,%d]\nTempo: %.2f" % (n_success, len(list_imgs), (float(n_success)/len(list_imgs))*100, narinas[0], narinas[1], total_time)
+benchmark_str = "Detected: %d/%d (%.2f)\nNarinas: [%d,%d,%d]\nTempo: %.2f" % (n_success, len(list_imgs), (float(n_success)/len(list_imgs))*100, narinas[0], narinas[1], narinas[2], total_time)
 print(benchmark_str)
 benchmark_file.write(benchmark_str)
 
