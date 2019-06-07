@@ -31,3 +31,6 @@ estrutura do diretório imgs é a mesma que o Wyverson upou no drive [(link)](ht
         ├── YOLO_nasalpattern
         └── YOLO_predictions
 ```
+
+## uso
+eu só uso os `execute.sh`, mas deve ser tranquilo usar os códigos. códigos aceitam argumentos de linha de comando, ver os `.sh` para exemplos
