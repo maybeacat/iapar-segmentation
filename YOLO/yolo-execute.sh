@@ -5,9 +5,9 @@
 # vars
 # mudar aqui
 python2=asd  # se 'true', usa python2 em vez de python3
-args=""  # <nada> | -f | -n    por enquanto
+args="-f"  # <nada> | -f | -n    por enquanto
 custompath=true  # se 'true', usa o path em $path
-path="../imgs/~rng"
+path="../imgs/Projeto_IAPAR/Base_Jersey/IAPAR2_1"
 fancy="****************************************" # decoracao
 
 # nao mudar aqui
@@ -35,8 +35,8 @@ fi
 rm -r results || true # garante execucao mesmo que a pasta nao exista
 mkdir results &&
 
-# roda yolov3_opencv.py
-file="yolov3_opencv.py"
+# roda yolo-detector.py
+file="yolo-detector.py"
 mkdir results/YOLO_predictions &&
 doit
 

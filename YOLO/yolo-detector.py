@@ -65,7 +65,7 @@ narinas = [0, 0, 0, 0, 0]
 # gera um array com todos os paths dos .jpg no diretorio
 list_imgs = []
 for root, dirnames, filenames in os.walk(imgs_rootdir):
-    for filename in fnmatch.filter(filenames, '*.jpg'):
+    for filename in fnmatch.filter(filenames, '*.[Jj][Pp][Gg]'): # case insensitive
         list_imgs.append(os.path.join(root, filename))
 
 # processa as imgs
@@ -146,7 +146,7 @@ for addr in list_imgs:
     narinas_file.write(info + '\n')
 
 
-    # parte que salva a img com bounding boxes
+    # parte que salva a img com bounding boxes (dependendo do nivel de logging)
     if box_logging != 'none':
         if len(idxs) > 0:
             if(box_logging == 'full' or len(idxs) != 2):
@@ -157,10 +157,11 @@ for addr in list_imgs:
 
                     # draw a bounding box rectangle and label on the image
                     color = (255, 0, 255)
-                    cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
+                    cv2.rectangle(image, (x, y), (x + w, y + h), color, 8)
                     text = "{}: {:.2f}".format('narina', confidences[i])
-                    cv2.putText(image, text, (x, y-5), cv2.FONT_HERSHEY_TRIPLEX, 2, color, 2) # desenha texto
-                    cv2.imwrite("YOLO_predictions/" + addr.split("/")[-1], image) # salva img
+                    cv2.putText(image, text, (x, y-5), cv2.FONT_HERSHEY_TRIPLEX, 3, color, 2) # desenha texto
+                    imgr = cv2.resize(image, None, fx=0.2, fy=0.2) # redimensiona para ocupar menos espaco
+                    cv2.imwrite("results/YOLO_predictions/" + addr.split("/")[-1], imgr) # salva img
 
 # calcula o tempo que demorou para terminar tudo
 total_time = time.time() - init
